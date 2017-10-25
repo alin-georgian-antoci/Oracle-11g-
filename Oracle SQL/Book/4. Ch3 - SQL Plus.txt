@@ -1,0 +1,211 @@
+----------------------------------------
+
+----------- SQL Plus Commands ----------
+
+1. APPEND text
+	- appends text to the current line
+2. CHANGE /old/new
+	- change the text specified by old to new in the current line 
+3. CLEAR BUFFER 
+	- clea all the lines from the bufer 
+4. DEL
+	- deletes the current line 
+5. DEL x
+	- deletes the x line 
+6. LIST
+	- lists all the lines in the buffer 
+7. LIST x 
+	- lists line nr x
+8. RUN or /
+	- runs the statement stored in the buffer 
+9. x
+	- makes the line specified by the line number x to the current line 
+	
+
+-----------------------------------------
+
+- SAVING, RETRIEVING, AND RUNNING FILES -
+
+-----------------------------------------
+
+1. SAVE filename [REPLACE | APPEND]
+	- saves the contents of buffer to the file specified 
+	- the file is saved in oracle_11g/product/11.1.0/db/bin directory
+2. GET filename
+	- display the content of the file specified 
+3. START filename or @ filename
+	- run the content of the file specified 
+4. EDIT
+	- starts the default editor with the content of the buffer 
+5. EDIT filename 
+	- starts the default editor with the content of the file specified 
+6. SPOOL filename 
+	- copies the output from sql*plus to the file specified by filename 
+7. SPOOL OFF 
+	- stop the copying of output from sql*plus to the file then closes that file. 
+	
+	
+-----------------------------------------
+
+---------- FORMATTING COLLUMNS-----------
+
+-----------------------------------------
+
+1. FORMAT format 
+	- sets the format of the display of the column or alias to the format string 
+2. HEADING heading 
+	- sets the heading of the column or alias to the heading string 
+3. JUSTIFY [{LEFT | CENTER | RIGHT}]
+	- places the column output to the left, center or right 
+4. WRAPPED 
+	- wraps the end of a string outo the next line of output 
+5. WORD_WRAPPED
+	- similar to the WRAPPED option, except individual words are not split across two lines.
+6. CLEAR 
+	- clears any formatting of columns.
+	
+
+-- EXAMPLES 
+SQL> COLUMN product_id FORMAT 99
+SQL> COLUMN name HEADING PRODUCT_NAME FORMAT A13 WORD_WRAPPED
+SQL> COLUMN description FORMAT A13 WORD_WRAPPED
+SQL> COLUMN price FORMAT $99.99
+
+
+7. SET PAGESIZE x 
+	- how many readable lines will return
+
+	
+	
+-----------------------------------------
+
+---------- USING VARIABLES --------------
+
+-----------------------------------------
+
+-- temporary
+-- defined 
+
+select product_id, name, price
+from products
+where product_id = &v_product_id;
+
+
+
+1. SET VERIFY ON/OFF 
+2. SET DEFINE '&'
+	- change the character back to an ampesand;
+4. DEFINE variable
+	- as the command says
+5. ACCEPT variable_name [type] [FORMAT format] [PROMPT prompt] [HIDE]
+	- The ACCEPT command waits for a user to enter a value for a variable.
+	
+	
+-----------------------------------------
+
+------- CREATE SIMPLE REPORTS -----------
+
+-----------------------------------------
+
+-- save this code to a file named raport1.sql*plus
+
+-- suppress display of the statements and verification messages
+SET ECHO OFF
+SET VERIFY OFF
+
+SELECT product_id, name, price
+FROM products
+WHERE product_id = &v_product_id;
+
+-- run the code with 
+@ "path to file"
+
+
+----------------------------------
+
+SET ECHO OFF
+SET VERIFY OFF
+
+ACCEPT v_product_id NUMBER FORMAT 99 PROMPT 'Enter product id: '
+
+SELECT product_id, name, price
+FROM products
+WHERE product_id = &v_product_id;
+-- clean up
+UNDEFINE v_product_id#
+
+
+
+-----------------------------------------
+
+------- ADDING A FOOTER AND HEADER -----------
+
+-----------------------------------------
+
+TTITLE LEFT 'Run date: ' _DATE CENTER 'Run by the ' SQL.USER ' user'
+RIGHT 'Page: ' FORMAT 999 SQL.PNO SKIP 2
+
+--
+
+BTITLE CENTER 'Thanks for running the report' RIGHT 'Page: ' FORMAT 999 SQL.PNO
+
+--
+
+TTITLE LEFT 'Run date: ' _DATE CENTER 'Run by the ' SQL.USER ' user'
+RIGHT 'Page: ' FORMAT 999 SQL.PNO SKIP 2
+
+BTITLE CENTER 'Thanks for running the report' RIGHT 'Page: '
+FORMAT 999 SQL.PNO
+
+SET ECHO OFF
+SET VERIFY OFF
+SET PAGESIZE 30
+SET LINESIZE 70
+CLEAR COLUMNS
+COLUMN product_id HEADING ID FORMAT 99
+COLUMN name HEADING 'Product Name' FORMAT A20 WORD_WRAPPED
+COLUMN description HEADING Description FORMAT A30 WORD_WRAPPED
+COLUMN price HEADING Price FORMAT $99.99
+
+SELECT product_id, name, description, price
+FROM products;
+
+CLEAR COLUMNS
+TTITLE OFF
+BTITLE OFF
+
+
+-----------------------------------------
+
+------- COMPUTING SUBTOTALS ------
+
+-----------------------------------------
+
+BREAK ON product_type_id
+COMPUTE SUM OF price ON product_type_id
+
+SET ECHO OFF
+SET VERIFY OFF
+SET PAGESIZE 50
+SET LINESIZE 70
+
+CLEAR COLUMNS
+COLUMN price HEADING Price FORMAT $999.99
+
+SELECT product_type_id, name, price
+FROM products
+ORDER BY product_type_id;
+
+CLEAR COLUMNS
+
+
+
+
+
+
+
+
+
+
+
+
